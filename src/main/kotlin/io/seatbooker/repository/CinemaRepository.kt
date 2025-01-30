@@ -1,0 +1,8 @@
+package io.seatbooker.io.seatbooker.repository
+
+import io.seatbooker.io.seatbooker.models.Cinema
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.stereotype.Repository
+
+@Repository
+interface CinemaRepository : JpaRepository<Cinema, Long>
