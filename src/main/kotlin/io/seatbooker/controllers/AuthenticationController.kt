@@ -3,8 +3,9 @@ package io.seatbooker.io.seatbooker.controllers
 import io.seatbooker.io.seatbooker.models.UserLookupResult
 import io.seatbooker.io.seatbooker.models.dto.LoginUserDto
 import io.seatbooker.io.seatbooker.models.dto.RegisterUserDto
-import io.seatbooker.io.seatbooker.models.response.CreateUserResponse
-import io.seatbooker.io.seatbooker.models.response.LoginResponse
+import io.seatbooker.io.seatbooker.models.response.ApiResponse
+import io.seatbooker.io.seatbooker.models.response.ErrorResponse
+import io.seatbooker.io.seatbooker.models.response.SuccessResponse
 import io.seatbooker.io.seatbooker.service.AuthenticationService
 import io.seatbooker.io.seatbooker.service.JwtService
 import io.seatbooker.io.seatbooker.service.UserService
@@ -25,14 +26,14 @@ open class AuthenticationController @Autowired constructor(
 ) {
 
     @PostMapping("/signup")
-    fun register(@RequestBody registerUserDto: RegisterUserDto): ResponseEntity<CreateUserResponse> {
+    fun register(@RequestBody registerUserDto: RegisterUserDto): ResponseEntity<ApiResponse> {
         val userResult = userExists(registerUserDto.username)
         when (userResult) {
             is UserLookupResult.UserExists -> {
                 return ResponseEntity.status(
                     HttpStatus.CONFLICT
                 ).body(
-                    CreateUserResponse(
+                    ErrorResponse.CreateUserErrorResponse(
                         errorMessage = "User signup failed"
                     )
                 )
@@ -41,7 +42,7 @@ open class AuthenticationController @Autowired constructor(
             is UserLookupResult.UserNotFound -> {
                 val registeredUser = authenticationService.signup(registerUserDto)
                 return ResponseEntity.ok(
-                    CreateUserResponse(
+                    SuccessResponse.CreateUserResponse(
                         user = registeredUser
                     )
                 )
@@ -50,13 +51,13 @@ open class AuthenticationController @Autowired constructor(
     }
 
     @PostMapping("/login")
-    fun authenticate(@RequestBody dto: LoginUserDto): ResponseEntity<LoginResponse> {
+    fun authenticate(@RequestBody dto: LoginUserDto): ResponseEntity<ApiResponse> {
         val userResult = userExists(dto.username)
         when (userResult) {
             is UserLookupResult.UserExists -> {
                 val authUser = authenticationService.authenticate(dto)
                 val jwtToken = jwtService.generateToken(authUser)
-                val loginResponse = LoginResponse(
+                val loginResponse = SuccessResponse.LoginResponse(
                     token = jwtToken,
                     expiresIn = jwtService.getExpirationTime()
                 )
@@ -65,7 +66,9 @@ open class AuthenticationController @Autowired constructor(
 
             is UserLookupResult.UserNotFound -> {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .build()
+                    .body(ErrorResponse.LoginErrorResponse(
+                        errorMessage = userResult.message
+                    ))
             }
         }
     }

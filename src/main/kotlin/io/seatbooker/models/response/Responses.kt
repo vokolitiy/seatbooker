@@ -4,28 +4,47 @@ import io.seatbooker.io.seatbooker.models.Cinema
 import io.seatbooker.io.seatbooker.models.MovieHallSeat
 import io.seatbooker.io.seatbooker.models.User
 
-data class LoginResponse(
-    val token: String,
-    val expiresIn: Long,
-    val errorMessage: String? = null
-)
+sealed interface ApiResponse
 
-data class CreateUserResponse(
-    val user: User? = null,
-    val errorMessage: String? = null
-)
+sealed interface ErrorResponse : ApiResponse {
+    data class LoginErrorResponse(
+        val errorMessage: String? = null
+    ): ErrorResponse
 
-data class CreateCinemaResponse(
-    val cinema: Cinema? = null,
-    val errorMessage: String? = null
-)
+    data class CreateUserErrorResponse(
+        val errorMessage: String? = null
+    ): ErrorResponse
 
-data class SeatResponse(
-    val seats: List<MovieHallSeat>
-)
+    data class CreateCinemaErrorResponse(
+        val errorMessage: String? = null
+    ): ErrorResponse
 
-data class SeatBookResponse(
-    val seatNumber: Int,
-    val isBooked: Boolean,
-    val seatPrice: Double
-)
+    data class SeatErrorResponse(
+        val errorMessage: String? = null
+    ): ErrorResponse
+}
+
+sealed interface SuccessResponse : ApiResponse {
+    data class LoginResponse(
+        val token: String,
+        val expiresIn: Long
+    ) : SuccessResponse
+
+    data class CreateUserResponse(
+        val user: User? = null
+    ): SuccessResponse
+
+    data class CreateCinemaResponse(
+        val cinema: Cinema? = null
+    ): SuccessResponse
+
+    data class SeatResponse(
+        val seats: List<MovieHallSeat>
+    ): SuccessResponse
+
+    data class SeatBookResponse(
+        val seatNumber: Int,
+        val isBooked: Boolean,
+        val seatPrice: Double
+    ): SuccessResponse
+}

@@ -4,7 +4,9 @@ import io.seatbooker.io.seatbooker.models.Cinema
 import io.seatbooker.io.seatbooker.models.CreateCinemaResult
 import io.seatbooker.io.seatbooker.models.MovieHall
 import io.seatbooker.io.seatbooker.models.dto.CinemaWithHallsDto
-import io.seatbooker.io.seatbooker.models.response.CreateCinemaResponse
+import io.seatbooker.io.seatbooker.models.response.ApiResponse
+import io.seatbooker.io.seatbooker.models.response.ErrorResponse
+import io.seatbooker.io.seatbooker.models.response.SuccessResponse
 import io.seatbooker.io.seatbooker.service.AdminService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -22,12 +24,12 @@ class AdminController @Autowired constructor(
 ) {
 
     @PostMapping("/cinema/create")
-    fun createCinema(@RequestBody dto: CinemaWithHallsDto): ResponseEntity<CreateCinemaResponse> {
+    fun createCinema(@RequestBody dto: CinemaWithHallsDto): ResponseEntity<ApiResponse> {
         val result = service.findCinema(dto.cinemaName)
         when (result) {
             is CreateCinemaResult.CinemaExists -> {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(CreateCinemaResponse(errorMessage = "Create cinema failed"))
+                    .body(ErrorResponse.CreateCinemaErrorResponse(errorMessage = "Create cinema failed"))
             }
 
             is CreateCinemaResult.CinemaNotFound -> {
@@ -50,31 +52,16 @@ class AdminController @Autowired constructor(
                 }
                 service.createMovieHalls(movieHalls)
                 return ResponseEntity.ok(
-                    CreateCinemaResponse(
+                    SuccessResponse.CreateCinemaResponse(
                         cinema = createdCinema
                     )
                 )
-                /*val cinemaName = dto.cinemaName
-                val cinemaHalls = dto.cinemaHalls
-                val hallSeats = cinemaHalls.flatMap { it.seats }
-                service.createSeats(hallSeats)
-                val createdHalls = service.createMovieHalls(cinemaHalls)
-                val cinema = Cinema().apply {
-                    name = cinemaName
-                    movieHalls = createdHalls.toHashSet()
-                }
-                val createdCinema = service.createCinema(cinema)
-                return ResponseEntity.ok(
-                    CreateCinemaResponse(
-                        cinema = createdCinema
-                    )
-                )*/
             }
         }
     }
 
     @PutMapping("/cinema/update")
-    fun updateCinema(@RequestBody dto: CinemaWithHallsDto): ResponseEntity<CreateCinemaResponse> {
+    fun updateCinema(@RequestBody dto: CinemaWithHallsDto): ResponseEntity<ApiResponse> {
         when (val result = service.findCinema(dto.cinemaName)) {
             is CreateCinemaResult.CinemaExists -> {
                 val dbCinema = result.cinema
@@ -82,7 +69,7 @@ class AdminController @Autowired constructor(
                 dbCinema.movieHalls = dto.cinemaHalls.toHashSet()
                 val updatedCinema = service.createCinema(dbCinema)
                 return ResponseEntity.ok(
-                    CreateCinemaResponse(
+                    SuccessResponse.CreateCinemaResponse(
                         cinema = updatedCinema
                     )
                 )
@@ -91,7 +78,7 @@ class AdminController @Autowired constructor(
             is CreateCinemaResult.CinemaNotFound -> {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(
-                        CreateCinemaResponse(
+                        ErrorResponse.CreateCinemaErrorResponse(
                             errorMessage = "Cinema with name ${dto.cinemaName} not found"
                         )
                     )
