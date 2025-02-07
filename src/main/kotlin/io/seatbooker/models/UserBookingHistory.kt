@@ -10,23 +10,27 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
+import java.time.ZonedDateTime
+import kotlin.collections.HashSet
 
 @Entity
-@Table(name = "seat")
-open class MovieHallSeat {
+@Table(name = "bookingHistory")
+open class UserBookingHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     open var id: Long? = null
-    @Column(name = "seat_number")
-    open var seatNumber: Int = 0
-    @Column(name = "seat_price")
-    open var ticketPrice: Double = 0.0
-    @Column(name = "is_booked")
-    open var isBooked: Boolean = false
+    @Column(name = "booked_at")
+    open var bookedAt: ZonedDateTime? = null
     @ManyToOne(
         cascade = [CascadeType.ALL]
     )
-    @JoinColumn(name="hall_id")
+    @JoinColumn(name="user_id")
     @JsonBackReference
-    private var movieHall: MovieHall? = null
+    open var users: User? = null
+    @Column(name = "cinema_name")
+    open var cinemaName: String? = null
+    @Column(name = "hall_id")
+    open var hallId: Long? = null
+    @Column(name = "booked_seats")
+    open var bookedSeats: MutableSet<Int> = HashSet()
 }

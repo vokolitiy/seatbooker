@@ -45,6 +45,8 @@ sealed interface SuccessResponse : ApiResponse {
     data class SeatBookResponse(
         val seatNumber: Int,
         val isBooked: Boolean,
-        val seatPrice: Double
+        val seatPrice: Double,
+        val userId: Long,
+        val cinemaId: Long
     ): SuccessResponse
 }
