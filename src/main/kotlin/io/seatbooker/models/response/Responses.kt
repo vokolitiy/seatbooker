@@ -3,6 +3,7 @@ package io.seatbooker.io.seatbooker.models.response
 import io.seatbooker.io.seatbooker.models.Cinema
 import io.seatbooker.io.seatbooker.models.MovieHallSeat
 import io.seatbooker.io.seatbooker.models.User
+import io.seatbooker.io.seatbooker.models.dto.BookingHistoryDto
 
 sealed interface ApiResponse
 
@@ -48,5 +49,9 @@ sealed interface SuccessResponse : ApiResponse {
         val seatPrice: Double,
         val userId: Long,
         val cinemaId: Long
+    ): SuccessResponse
+
+    data class BookingHistoryResponse(
+        val bookings: List<BookingHistoryDto>
     ): SuccessResponse
 }

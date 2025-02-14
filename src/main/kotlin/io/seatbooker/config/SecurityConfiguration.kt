@@ -25,7 +25,10 @@ open class SecurityConfiguration @Autowired constructor(
         http.csrf { customizer ->
             customizer.disable()
                 .authorizeHttpRequests { requests ->
-                    requests.requestMatchers("/api/v1/users/me").authenticated()
+                    requests.requestMatchers(
+                        "/api/v1/users/me",
+                        "/api/v1/users/me/bookings"
+                    ).authenticated()
                 }.authorizeHttpRequests { requests ->
                     requests.requestMatchers(
                         "/api/v1/auth/**",

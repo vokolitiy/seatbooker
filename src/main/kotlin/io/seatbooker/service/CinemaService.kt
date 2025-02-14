@@ -6,6 +6,7 @@ import io.seatbooker.io.seatbooker.models.MovieHallSeat
 import io.seatbooker.io.seatbooker.models.UserBookingHistory
 import io.seatbooker.io.seatbooker.models.response.SuccessResponse
 import io.seatbooker.io.seatbooker.repository.CinemaRepository
+import io.seatbooker.io.seatbooker.repository.MovieHallRepository
 import io.seatbooker.io.seatbooker.repository.SeatRepository
 import io.seatbooker.io.seatbooker.repository.UserBookingHistoryRepository
 import io.seatbooker.io.seatbooker.repository.UserRepository
@@ -21,6 +22,7 @@ open class CinemaService @Autowired constructor(
     private val cinemaRepository: CinemaRepository,
     private val seatRepository: SeatRepository,
     private val historyRepository: UserBookingHistoryRepository,
+    private val movieHallRepository: MovieHallRepository,
     private val userService: UserService
 ) {
 
@@ -88,6 +90,19 @@ open class CinemaService @Autowired constructor(
                 bookingHistory.add(savedHistory)
             }
             userRepository.save(updatedUser)
+        }
+    }
+
+    fun findHallName(hallId: Long?): String? {
+        if (hallId == null) {
+            return null
+        } else {
+            val movieHallOptional = movieHallRepository.findById(hallId)
+            return if (movieHallOptional.isPresent) {
+                movieHallOptional.get().name
+            } else {
+                null
+            }
         }
     }
 }
