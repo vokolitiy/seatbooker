@@ -21,10 +21,10 @@ kotlin {
 }
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-web:3.3.3")
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.3.3")
-    implementation("org.springframework.boot:spring-boot-starter-thymeleaf:3.3.3")
-    implementation("org.springframework.boot:spring-boot-starter-security:3.3.3")
+    implementation("org.springframework.boot:spring-boot-starter-web:3.4.3")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.4.3")
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf:3.4.3")
+    implementation("org.springframework.boot:spring-boot-starter-security:3.4.3")
     //use H2 database instead of Postgres for development for now
     implementation("com.h2database:h2:2.3.230")
     runtimeOnly("org.jetbrains.kotlin:kotlin-reflect:2.0.0")
