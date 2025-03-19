@@ -28,5 +28,5 @@ open class MovieHallSeat {
     )
     @JoinColumn(name="hall_id")
     @JsonBackReference
-    private var movieHall: MovieHall? = null
+    open var movieHall: MovieHall? = null
 }

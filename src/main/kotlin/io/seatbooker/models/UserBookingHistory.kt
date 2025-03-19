@@ -21,6 +21,8 @@ open class UserBookingHistory {
     open var id: Long? = null
     @Column(name = "booked_at")
     open var bookedAt: ZonedDateTime? = null
+    @Column(name = "ticket_price")
+    open var ticketPrice: Double? = null
     @ManyToOne(
         cascade = [CascadeType.ALL]
     )

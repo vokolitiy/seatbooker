@@ -27,3 +27,13 @@ sealed interface CreateCinemaResult {
         val message: String
     ): CreateCinemaResult
 }
+
+sealed interface BookingResult {
+    data class SeatAlreadyBooked(
+        val message: String
+    ): BookingResult
+
+    data class BookingAdded(
+        val booking: UserBookingHistory
+    ): BookingResult
+}

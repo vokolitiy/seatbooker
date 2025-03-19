@@ -44,11 +44,11 @@ sealed interface SuccessResponse : ApiResponse {
     ): SuccessResponse
 
     data class SeatBookResponse(
-        val seatNumber: Int,
+        val seatNumber: Set<Int>,
         val isBooked: Boolean,
         val seatPrice: Double,
         val userId: Long,
-        val cinemaId: Long
+        val cinemaName: String?
     ): SuccessResponse
 
     data class BookingHistoryResponse(

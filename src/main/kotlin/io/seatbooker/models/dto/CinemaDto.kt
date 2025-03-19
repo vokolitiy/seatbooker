@@ -17,9 +17,7 @@ data class SeatDto(
     @JsonProperty("movieHallId")
     val movieHallId: String,
     @JsonProperty("id")
-    val id: Long,
-    @JsonProperty("userId")
-    val userId: Long
+    val seatNumber: Int
 )
 
 data class BookingHistoryDto(
