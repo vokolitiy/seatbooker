@@ -1,6 +1,7 @@
 package io.seatbooker.io.seatbooker.config
 
 import io.seatbooker.io.seatbooker.repository.UserRepository
+import io.seatbooker.io.seatbooker.service.UserDetailsServiceImpl
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -17,7 +18,7 @@ open class ApplicationConfiguration @Autowired constructor(val repository: UserR
 
     @Bean
     open fun userDetailsService(): UserDetailsService {
-        return UserDetailsService { username -> repository.findByUsername(username) }
+        return UserDetailsServiceImpl()
     }
 
     @Bean

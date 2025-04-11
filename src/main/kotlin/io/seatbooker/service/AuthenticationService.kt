@@ -1,9 +1,12 @@
 package io.seatbooker.io.seatbooker.service
 
+import io.seatbooker.io.seatbooker.models.Role
 import io.seatbooker.io.seatbooker.models.User
 import io.seatbooker.io.seatbooker.models.dto.LoginUserDto
 import io.seatbooker.io.seatbooker.models.dto.RegisterUserDto
+import io.seatbooker.io.seatbooker.repository.RoleRepository
 import io.seatbooker.io.seatbooker.repository.UserRepository
+import java.util.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -14,7 +17,8 @@ import org.springframework.stereotype.Service
 open class AuthenticationService @Autowired constructor(
     private val userRepository: UserRepository,
     private val passwordEncoder: PasswordEncoder,
-    private val authenticationManager: AuthenticationManager
+    private val authenticationManager: AuthenticationManager,
+    private val roleRepository: RoleRepository
 ) {
 
     fun signup(dto: RegisterUserDto): User {
@@ -24,6 +28,9 @@ open class AuthenticationService @Autowired constructor(
             username = dto.username
             firstName = dto.firstName
             lastName = dto.lastName
+            roles = listOf(roleRepository.findByName("ROLE_USER") ?: Role().apply {
+                name = "ROLE_USER"
+            }).toMutableList()
         }
 
         val registeredUser = userRepository.save(userToRegister)
