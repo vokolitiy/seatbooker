@@ -5,12 +5,17 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl
 import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher
+
 
 @Configuration
 @EnableWebSecurity
@@ -21,28 +26,34 @@ open class SecurityConfiguration @Autowired constructor(
 ) {
 
     @Bean
+    open fun roleHierarchy(): RoleHierarchy {
+        val hierarchy = "ROLE_ADMIN > ROLE_STAFF \n ROLE_STAFF > ROLE_USER"
+        val roleHierarchy = RoleHierarchyImpl.fromHierarchy(hierarchy)
+        return roleHierarchy
+    }
+
+    @Bean
+    open fun customWebSecurityExpressionHandler(): DefaultWebSecurityExpressionHandler {
+        val expressionHandler = DefaultWebSecurityExpressionHandler()
+        expressionHandler.setRoleHierarchy(roleHierarchy())
+        return expressionHandler
+    }
+
+    @Bean
     open fun filterChain(http: HttpSecurity): SecurityFilterChain {
-        http.csrf { customizer ->
-            customizer.disable()
-                .authorizeHttpRequests { requests ->
-                    requests.requestMatchers(
-                        "/api/v1/users/me",
-                        "/api/v1/users/me/bookings"
-                    ).authenticated()
-                }.authorizeHttpRequests { requests ->
-                    requests.requestMatchers(
-                        "/api/v1/auth/**",
-                        "/api/v1/home",
-                        "/api/v1/admin",
-                        "/api/v1/cinema"
-                    ).permitAll()
-                        .anyRequest()
-                        .permitAll()
-                }.sessionManagement { sessionCustomizer ->
-                    sessionCustomizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                }.authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
-        }
+        http
+            .csrf { csrf -> csrf.disable() }
+            .sessionManagement { sessionManagement ->
+                sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            }
+            .authorizeHttpRequests { authorizeHttpRequests ->
+                authorizeHttpRequests
+                    .requestMatchers("/api/v1/users/me").authenticated()
+                    .requestMatchers("/api/v1/cinema/**").authenticated()
+                    .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                    .anyRequest().permitAll()
+            }
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
 
         return http.build()
     }

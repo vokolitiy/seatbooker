@@ -17,8 +17,7 @@ import org.springframework.stereotype.Service
 open class AuthenticationService @Autowired constructor(
     private val userRepository: UserRepository,
     private val passwordEncoder: PasswordEncoder,
-    private val authenticationManager: AuthenticationManager,
-    private val roleRepository: RoleRepository
+    private val authenticationManager: AuthenticationManager
 ) {
 
     fun signup(dto: RegisterUserDto): User {
@@ -28,9 +27,7 @@ open class AuthenticationService @Autowired constructor(
             username = dto.username
             firstName = dto.firstName
             lastName = dto.lastName
-            roles = listOf(roleRepository.findByName("ROLE_USER") ?: Role().apply {
-                name = "ROLE_USER"
-            }).toMutableList()
+            roles = listOf(Role().apply { name = dto.role }).toMutableList()
         }
 
         val registeredUser = userRepository.save(userToRegister)
@@ -48,5 +45,4 @@ open class AuthenticationService @Autowired constructor(
         return userRepository.findByUsername(dto.username)
             ?: throw IllegalStateException("Something went wrong")
     }
-
 }

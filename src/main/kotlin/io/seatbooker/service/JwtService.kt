@@ -1,6 +1,7 @@
 package io.seatbooker.io.seatbooker.service
 
 import io.jsonwebtoken.Claims
+import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.io.Decoders
@@ -11,77 +12,39 @@ import org.springframework.stereotype.Service
 import java.security.Key
 import java.util.*
 import java.util.function.Function
-
+import javax.crypto.SecretKey
 
 @Service
 class JwtService {
 
-    @Value("\${security.jwt.secret-key}")
-    private val secretKey: String? = null
+    private val jwtSecret: SecretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256)
 
     @Value("\${security.jwt.expiration-time}")
-    private val jwtExpiration: Long = 0
+    val jwtExpiration: Long = 0
+        get() = field
 
-    fun extractUsername(token: String?): String {
-        return extractClaim(token) { obj: Claims -> obj.subject }
-    }
-
-    fun <T> extractClaim(token: String?, claimsResolver: Function<Claims, T>): T {
-        val claims = extractAllClaims(token)
-        return claimsResolver.apply(claims)
-    }
-
-    fun generateToken(userDetails: UserDetails): String {
-        return generateToken(HashMap(), userDetails)
-    }
-
-    fun generateToken(extraClaims: Map<String?, Any?>, userDetails: UserDetails): String {
-        return buildToken(extraClaims, userDetails, jwtExpiration)
-    }
-
-    fun getExpirationTime(): Long {
-        return jwtExpiration
-    }
-
-    private fun buildToken(
-        extraClaims: Map<String?, Any?>,
-        userDetails: UserDetails,
-        expiration: Long
-    ): String {
-        return Jwts
-            .builder()
-            .setClaims(extraClaims)
-            .setSubject(userDetails.username)
-            .setIssuedAt(Date(System.currentTimeMillis()))
-            .setExpiration(Date(System.currentTimeMillis() + expiration))
-            .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+    fun generateToken(username: String, roles: List<String>): String {
+        return Jwts.builder()
+            .setSubject(username)
+            .claim("roles", roles)
+            .setIssuedAt(Date())
+            .setExpiration(Date(System.currentTimeMillis() + jwtExpiration))
+            .signWith(jwtSecret)
             .compact()
     }
 
-    fun isTokenValid(token: String?, userDetails: UserDetails): Boolean {
-        val username = extractUsername(token)
-        return (username == userDetails.username) && !isTokenExpired(token)
-    }
+    fun extractUsername(token: String): String =
+        Jwts.parserBuilder().setSigningKey(jwtSecret).build()
+            .parseClaimsJws(token).body.subject
 
-    private fun isTokenExpired(token: String?): Boolean {
-        return extractExpiration(token).before(Date())
-    }
+    fun extractRoles(token: String): List<String> =
+        Jwts.parserBuilder().setSigningKey(jwtSecret).build()
+            .parseClaimsJws(token).body["roles"] as List<String>
 
-    private fun extractExpiration(token: String?): Date {
-        return extractClaim(token) { obj: Claims -> obj.expiration }
-    }
-
-    private fun extractAllClaims(token: String?): Claims {
-        return Jwts
-            .parserBuilder()
-            .setSigningKey(getSignInKey())
-            .build()
-            .parseClaimsJws(token)
-            .body
-    }
-
-    private fun getSignInKey(): Key {
-        val keyBytes = Decoders.BASE64.decode(secretKey)
-        return Keys.hmacShaKeyFor(keyBytes)
+    fun validateToken(token: String): Boolean = try {
+        Jwts.parserBuilder().setSigningKey(jwtSecret).build().parseClaimsJws(token)
+        true
+    } catch (e: JwtException) {
+        false
     }
 }

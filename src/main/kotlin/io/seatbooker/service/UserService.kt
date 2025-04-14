@@ -20,7 +20,7 @@ class UserService @Autowired constructor(
 
     fun currentUser(): User {
         val authentication = SecurityContextHolder.getContext().authentication
-        val currentUser = authentication.principal as User
+        val currentUser = findUser(authentication.principal.toString()) as User
         return currentUser
     }
 

@@ -55,7 +55,7 @@ open class User : UserDetails {
     @JsonManagedReference
     open var bookingHistory: MutableSet<UserBookingHistory> = HashSet()
 
-    @ManyToMany
+    @ManyToMany(cascade = [CascadeType.ALL])
     @JoinTable(
         name = "users_roles",
         joinColumns = [JoinColumn(name = "user_id", referencedColumnName = "id")],

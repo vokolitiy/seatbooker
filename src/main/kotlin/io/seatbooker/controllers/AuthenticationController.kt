@@ -56,10 +56,10 @@ open class AuthenticationController @Autowired constructor(
         when (userResult) {
             is UserLookupResult.UserExists -> {
                 val authUser = authenticationService.authenticate(dto)
-                val jwtToken = jwtService.generateToken(authUser)
+                val jwtToken = jwtService.generateToken(authUser.username, authUser.roles.map { it.name })
                 val loginResponse = SuccessResponse.LoginResponse(
                     token = jwtToken,
-                    expiresIn = jwtService.getExpirationTime()
+                    expiresIn = jwtService.jwtExpiration
                 )
                 return ResponseEntity.ok(loginResponse)
             }

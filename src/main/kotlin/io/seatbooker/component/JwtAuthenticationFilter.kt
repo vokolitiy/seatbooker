@@ -4,9 +4,12 @@ import io.seatbooker.io.seatbooker.service.JwtService
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource
@@ -35,22 +38,21 @@ open class JwtAuthenticationFilter @Autowired constructor(
         }
 
         try {
-            val jwt = header.substring(7)
-            val username = jwtService.extractUsername(jwt)
-            val authentication = SecurityContextHolder.getContext().authentication
-            if (authentication == null) {
-                val userDetails = userDetailsService.loadUserByUsername(username)
-                if (jwtService.isTokenValid(jwt, userDetails)) {
-                    val authToken = UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.authorities
-                    )
+            val authHeader = request.getHeader("Authorization")
 
-                    authToken.details = WebAuthenticationDetailsSource().buildDetails(request)
-                    SecurityContextHolder.getContext().authentication = authToken
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                val token = authHeader.substring(7)
+                if (jwtService.validateToken(token)) {
+                    val username = jwtService.extractUsername(token)
+                    val roles = jwtService.extractRoles(token)
+                    val authorities = roles.map { SimpleGrantedAuthority(it) }
+
+                    val auth = UsernamePasswordAuthenticationToken(username, null, authorities)
+                    auth.details = WebAuthenticationDetailsSource().buildDetails(request)
+                    SecurityContextHolder.getContext().authentication = auth
                 }
             }
+
             filterChain.doFilter(request, response)
         } catch (exc: Exception) {
             exceptionResolver.resolveException(request, response, null, exc)

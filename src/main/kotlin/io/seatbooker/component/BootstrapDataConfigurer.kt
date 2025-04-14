@@ -31,16 +31,17 @@ open class BootstrapDataConfigurer @Autowired constructor(
         val readPrivilege = createPrivilegeIfNotFound("READ_PRIVILEGE")
         val writePrivilege = createPrivilegeIfNotFound("WRITE_PRIVILEGE")
 
-        val adminPrivileges: List<Privilege> = Arrays.asList(
+        val adminPrivileges: List<Privilege> = listOf(
             readPrivilege, writePrivilege
         )
         createRoleIfNotFound("ROLE_ADMIN", adminPrivileges)
-        createRoleIfNotFound("ROLE_USER", Arrays.asList(readPrivilege))
+        createRoleIfNotFound("ROLE_USER", listOf(readPrivilege))
 
         val adminRole = roleRepository.findByName("ROLE_ADMIN")
         val user = User()
         user.firstName = "admin"
         user.lastName = "admin"
+        user.username = "admin"
         user.password = passwordEncoder.encode("admin")
         user.email = "admin@admin.com"
         user.roles = Arrays.asList(adminRole)
