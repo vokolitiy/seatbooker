@@ -1,4 +1,4 @@
-{
+[{
   "name": "River Cinema",
   "halls": [
     {
@@ -81,4 +81,87 @@
       ]
     }
   ]
-}
+},{
+  "name": "River Cinema 2",
+  "halls": [
+    {
+      "name": "Orange 2",
+      "seats": [
+        {
+          "seatNumber": 1,
+          "ticketPrice": 17.00,
+          "isBooked": false
+        },
+        {
+          "seatNumber": 2,
+          "ticketPrice": 16.00,
+          "isBooked": false
+        },
+        {
+          "seatNumber": 3,
+          "ticketPrice": 15.00,
+          "isBooked": false
+        },
+        {
+          "seatNumber": 4,
+          "ticketPrice": 17.00,
+          "isBooked": false
+        },
+        {
+          "seatNumber": 5,
+          "ticketPrice": 18.00,
+          "isBooked": false
+        },
+        {
+          "seatNumber": 6,
+          "ticketPrice": 19.00,
+          "isBooked": false
+        },
+        {
+          "seatNumber": 7,
+          "ticketPrice": 17.00,
+          "isBooked": false
+        }
+      ]
+    }, {
+      "name": "Violet 2",
+      "seats": [
+        {
+          "seatNumber": 1,
+          "ticketPrice": 17.00,
+          "isBooked": false
+        },
+        {
+          "seatNumber": 2,
+          "ticketPrice": 16.00,
+          "isBooked": false
+        },
+        {
+          "seatNumber": 3,
+          "ticketPrice": 15.00,
+          "isBooked": false
+        },
+        {
+          "seatNumber": 4,
+          "ticketPrice": 17.00,
+          "isBooked": false
+        },
+        {
+          "seatNumber": 5,
+          "ticketPrice": 18.00,
+          "isBooked": false
+        },
+        {
+          "seatNumber": 6,
+          "ticketPrice": 19.00,
+          "isBooked": false
+        },
+        {
+          "seatNumber": 7,
+          "ticketPrice": 17.00,
+          "isBooked": false
+        }
+      ]
+    }
+  ]
+}]

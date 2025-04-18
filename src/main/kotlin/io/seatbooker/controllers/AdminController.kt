@@ -24,39 +24,48 @@ class AdminController @Autowired constructor(
 ) {
 
     @PostMapping("/cinema/create")
-    fun createCinema(@RequestBody dto: CinemaWithHallsDto): ResponseEntity<ApiResponse> {
-        val result = service.findCinema(dto.cinemaName)
-        when (result) {
-            is CreateCinemaResult.CinemaExists -> {
-                return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(ErrorResponse.CreateCinemaErrorResponse(errorMessage = "Create cinema failed"))
-            }
+    fun createCinema(@RequestBody dto: List<CinemaWithHallsDto>): ResponseEntity<ApiResponse> {
+        val createdCinemas = mutableListOf<Cinema>()
+        if (dto.isNotEmpty()) {
+            dto.forEach { cinemaDto ->
+                val result = service.findCinema(cinemaDto.cinemaName)
+                when (result) {
+                    is CreateCinemaResult.CinemaExists -> {
+                        return ResponseEntity.status(HttpStatus.CONFLICT)
+                            .body(ErrorResponse.CreateCinemaErrorResponse(errorMessage = "Create cinema failed"))
+                    }
 
-            is CreateCinemaResult.CinemaNotFound -> {
-                val cinemaName = dto.cinemaName
-                val cinemaHalls = dto.cinemaHalls
-                val hallSeats = cinemaHalls.flatMap { it.seats }
-                service.createSeats(hallSeats)
-                val cinema = Cinema().apply {
-                    name = cinemaName
-                    movieHalls = cinemaHalls.toHashSet()
-                }
-                val createdCinema = service.createCinema(cinema)
-                val movieHalls = cinemaHalls.map { hall ->
-                    MovieHall().apply {
-                        id = hall.id
-                        name = hall.name
-                        seats = hall.seats
-                        this.cinema = createdCinema
+                    is CreateCinemaResult.CinemaNotFound -> {
+                        val cinemaName = cinemaDto.cinemaName
+                        val cinemaHalls = cinemaDto.cinemaHalls
+                        val hallSeats = cinemaHalls.flatMap { it.seats }
+                        service.createSeats(hallSeats)
+                        val cinema = Cinema().apply {
+                            name = cinemaName
+                            movieHalls = cinemaHalls.toHashSet()
+                        }
+                        val createdCinema = service.createCinema(cinema)
+                        val movieHalls = cinemaHalls.map { hall ->
+                            MovieHall().apply {
+                                id = hall.id
+                                name = hall.name
+                                seats = hall.seats
+                                this.cinema = createdCinema
+                            }
+                        }
+                        service.createMovieHalls(movieHalls)
+                        createdCinemas.add(createdCinema)
                     }
                 }
-                service.createMovieHalls(movieHalls)
-                return ResponseEntity.ok(
-                    SuccessResponse.CreateCinemaResponse(
-                        cinema = createdCinema
-                    )
-                )
             }
+            return ResponseEntity.ok(
+                SuccessResponse.CreateCinemaResponse(
+                    cinemas = createdCinemas
+                )
+            )
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .build()
         }
     }
 

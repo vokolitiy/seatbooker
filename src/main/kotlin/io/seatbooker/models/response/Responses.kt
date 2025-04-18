@@ -36,7 +36,8 @@ sealed interface SuccessResponse : ApiResponse {
     ): SuccessResponse
 
     data class CreateCinemaResponse(
-        val cinema: Cinema? = null
+        val cinema: Cinema? = null,
+        val cinemas: List<Cinema>? = null
     ): SuccessResponse
 
     data class SeatResponse(
